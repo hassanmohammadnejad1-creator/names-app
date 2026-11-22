@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دفترچه اسامی</title>
+<style>
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --ink:#1d2b26; --muted:#6b7b75;
+  --accent:#1f6f5c; --accent-ink:#ffffff; --line:#d9e2de; --danger:#b3382c;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#141b18; --surface:#1d2723; --ink:#e8f0ec; --muted:#93a39c;
+    --accent:#4fb89a; --accent-ink:#0c1512; --line:#2b3933; --danger:#e07b6f;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141b18; --surface:#1d2723; --ink:#e8f0ec; --muted:#93a39c;
+  --accent:#4fb89a; --accent-ink:#0c1512; --line:#2b3933; --danger:#e07b6f;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Vazirmatn,Tahoma,"Segoe UI",sans-serif;line-height:1.7}
+main{max-width:480px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px;font-size:.95rem}
+.add{display:flex;gap:8px;margin-bottom:12px}
+input{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px}
+.btn{background:var(--accent);color:var(--accent-ink);padding:12px 18px;font-weight:600}
+ul{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+li{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+li:last-child{border-bottom:0}
+li span{flex:1;word-break:break-word}
+.del{background:transparent;color:var(--danger);padding:6px 10px}
+.empty{padding:24px 14px;text-align:center;color:var(--muted)}
+.bar{display:flex;justify-content:space-between;align-items:center;margin:0 0 8px;color:var(--muted);font-size:.9rem}
+.clear{background:transparent;color:var(--muted);text-decoration:underline;padding:4px}
+</style>
+</head>
+<body>
+<main>
+  <h1>دفترچه اسامی</h1>
+  <p class="sub">نام افراد را اضافه کنید؛ روی همین دستگاه ذخیره می‌شود.</p>
+  <div class="add">
+    <input id="name" type="text" placeholder="نام را بنویسید" autocomplete="off" aria-label="نام">
+    <button class="btn" id="addBtn">افزودن</button>
+  </div>
+  <div class="bar"><span id="count"></span><button class="clear" id="clearBtn">پاک کردن همه</button></div>
+  <ul id="list"></ul>
+</main>
+<script>
+var KEY="names-list", names=[];
+try{ var raw=localStorage.getItem(KEY); if(raw) names=JSON.parse(raw)||[]; }catch(e){ names=[]; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(names)); }catch(e){} }
+function render(){
+  var ul=document.getElementById("list"); ul.innerHTML="";
+  if(!names.length){
+    var e=document.createElement("li"); e.className="empty"; e.textContent="هنوز نامی اضافه نشده است."; ul.appendChild(e);
+  }
+  names.forEach(function(n,i){
+    var li=document.createElement("li"), s=document.createElement("span"), b=document.createElement("button");
+    s.textContent=n; b.className="del"; b.textContent="حذف"; b.setAttribute("aria-label","حذف "+n);
+    b.onclick=function(){ names.splice(i,1); save(); render(); };
+    li.appendChild(s); li.appendChild(b); ul.appendChild(li);
+  });
+  document.getElementById("count").textContent=names.length+" نام";
+  document.getElementById("clearBtn").style.visibility=names.length?"visible":"hidden";
+}
+function add(){
+  var inp=document.getElementById("name"), v=inp.value.trim();
+  if(!v){ inp.focus(); return; }
+  names.unshift(v); save(); render(); inp.value=""; inp.focus();
+}
+document.getElementById("addBtn").onclick=add;
+document.getElementById("name").addEventListener("keydown",function(e){ if(e.key==="Enter") add(); });
+document.getElementById("clearBtn").onclick=function(){ if(confirm("همه نام‌ها پاک شود؟")){ names=[]; save(); render(); } };
+render();
+</script>
+</body>
+</html>
